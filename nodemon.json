@@ -1,0 +1,8 @@
+{
+    "env": {
+        "JWT_KEY": "4d3muchl1s060195",
+        "NODE_ORACLEDB_CONNECTIONSTRING": "localhost/ORCL",
+        "NODE_ORACLEDB_USER": "adelocal",
+        "NODE_ORACLEDB_PASSWORD": "ademuchlis"
+    }
+}
