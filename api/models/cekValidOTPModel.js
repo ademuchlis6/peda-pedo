@@ -10,7 +10,7 @@ const connection = mysql.createConnection({
 function cekValidOTP(nomor, callback) {
     const sql = 'select RIGHT(TextDecoded, 6) as otp from sentitems '
         + 'where DestinationNumber = ? '
-        + 'and UpdatedInDB IN (SELECT max(UpdatedInDB) FROM sentitems)';
+        + 'and HOUR(TIMEDIFF(NOW(), UpdatedInDB))<2';
     return connection.query(sql, [nomor], function (err, result) {
         if (err) throw err;
         // console.log(result);

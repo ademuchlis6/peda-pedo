@@ -1,4 +1,5 @@
 const cekValidOTP = require('../models/cekValidOTPModel');
+const InsertUser = require('../models/insertUserModel');
 
 exports.signUp = (req, res, next) => {
 
@@ -8,7 +9,8 @@ exports.signUp = (req, res, next) => {
             message: "Bad Request"
         });
     }
-    if (!req.body.nik || !req.body.noHp || !req.body.otp) {
+    if (!req.body.nik || !req.body.noHp || !req.body.otp
+        || !req.body.password || !req.body.confirmPassword) {
         return res.status(400).json({
             status: 400,
             message: "Bad Request"
@@ -40,24 +42,40 @@ exports.signUp = (req, res, next) => {
             message: "NIK kurang dari 16 digit"
         });
     }
+    //cek length pass
+    if (String(req.body.password) < 8 || String(req.body.confirmPassword).length < 8) {
+        return res.status(400).json({
+            status: 400,
+            message: "Password Minimal 8 karakter"
+        });
+    }
+    //cek password = confirmPassword    
+    if (req.body.password != req.body.confirmPassword) {
+        return res.status(400).json({
+            status: 400,
+            message: "Password tidak sama"
+        });
+    }
 
     cekValidOTP(String(req.body.noHp), function (result) {
-        const otpDb = JSON.parse(JSON.stringify(result))[0].otp;
-
-        if (otpDb == req.body.otp) {
-            // insert to db user
-            res.status(200).json({
-                status: 200,
-                message: "token sama"
-            });
-        } else {
-            res.status(404).json({
-                status: 404,
+        const otpDb = JSON.parse(JSON.stringify(result)).otp;
+        const otpArr = result.map(a => a.otp);
+        //cek jika otp yg dimasukan masih berumur 2 jam
+        if (otpArr.includes(String(req.body.otp)) == false) {
+            res.status(400).json({
+                status: 400,
                 message: "token tidak sama"
+            });
+
+        } else {
+            //insert ke db app tbl user_client
+            InsertUser(req.body.nik, req.body.noHp, req.body.password).then((result) => {
+                res.status(200).json({
+                    status: 200,
+                    message: "Registrasi Berhasil"
+                });
             });
         }
 
     });
-
-
 }
